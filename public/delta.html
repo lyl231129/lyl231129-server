@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>三角洲行动 · 玩家站</title>
+<style>
+:root{--bg:#05070d;--line:rgba(255,255,255,.09);--text:#e8eef8;--muted:#8b97ad;--dim:#5d6880;
+  --cyan:#22d3ee;--violet:#8b5cf6;--amber:#fbbf24;--green:#34d399;
+  --mono:ui-monospace,Menlo,Consolas,"Courier New",monospace}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:"PingFang SC","Microsoft YaHei",system-ui,-apple-system,sans-serif;
+  line-height:1.65;padding:0 0 60px}
+.wrap{max-width:980px;margin:0 auto;padding:0 20px}
+header{border-bottom:1px solid var(--line);padding:18px 0;margin-bottom:28px}
+header .wrap{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+h1{font-size:20px;letter-spacing:-.01em}
+h1 span{color:var(--cyan)}
+header a{color:var(--muted);font-size:13px}
+h2{font-size:16px;margin-bottom:14px}
+h2 b{color:var(--cyan);font-weight:600}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px}
+.card{border:1px solid var(--line);border-radius:14px;padding:20px;
+  background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.012))}
+label{display:block;font-size:12.5px;color:var(--dim);margin:10px 0 5px}
+input,select,textarea{width:100%;background:#070b14;border:1px solid var(--line);color:var(--text);
+  border-radius:9px;padding:9px 11px;font-size:14px;font-family:inherit}
+input:focus,select:focus,textarea:focus{outline:none;border-color:rgba(34,211,238,.5)}
+textarea{font-family:var(--mono);font-size:12.5px;min-height:96px;resize:vertical}
+button{margin-top:12px;width:100%;padding:11px;border-radius:10px;border:none;font-size:14px;font-weight:600;
+  font-family:inherit;cursor:pointer;background:linear-gradient(135deg,var(--cyan),var(--violet));color:#05070d}
+button:hover{filter:brightness(1.08)}
+button.ghost{background:none;border:1px solid var(--line);color:var(--text)}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th{text-align:left;color:var(--dim);font-weight:500;font-size:12px;padding:8px 6px;border-bottom:1px solid var(--line)}
+td{padding:9px 6px;border-bottom:1px solid rgba(255,255,255,.05);vertical-align:middle}
+td.p{color:var(--cyan);font-family:var(--mono)}
+td.u{color:var(--muted)}
+.tag{display:inline-block;font-size:11px;padding:2px 7px;border-radius:5px;font-family:var(--mono)}
+.tag.sell{background:rgba(34,211,238,.14);color:var(--cyan)}
+.tag.buy{background:rgba(139,92,246,.16);color:var(--violet)}
+.cancel{background:none;border:1px solid rgba(251,191,36,.4);color:var(--amber);padding:3px 10px;
+  border-radius:6px;font-size:12px;width:auto;margin:0;cursor:pointer}
+.empty{color:var(--dim);font-size:13.5px;padding:16px 0}
+.msg{padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:13.5px}
+.msg b{color:var(--cyan);margin-right:8px}
+.msg span{color:var(--dim);font-size:11.5px;margin-left:8px;font-family:var(--mono)}
+.note{font-size:12.5px;color:var(--dim);margin-top:10px;line-height:1.7}
+@media(max-width:720px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<header><div class="wrap">
+  <h1>三角洲行动 · <span>玩家站</span></h1>
+  <a href="/">← 服务器首页</a>
+</div></header>
+
+<div class="wrap">
+
+  <div class="grid">
+    <div class="card">
+      <h2>全服交易行</h2>
+      <div id="orders"><p class="empty">加载中…</p></div>
+    </div>
+
+    <div class="card">
+      <h2>挂一单</h2>
+      <label>玩家名</label>
+      <input id="f-user" placeholder="你的游戏内名字">
+      <label>物品 ID</label>
+      <input id="f-item" placeholder="例如 skin1">
+      <label>类型</label>
+      <select id="f-type"><option value="sell">出售</option><option value="buy">求购</option></select>
+      <label>价格（哈夫币）</label>
+      <input id="f-price" type="number" value="250000" min="0" max="99999999">
+      <button onclick="postOrder()">上架</button>
+      <p class="note" id="post-note"></p>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <h2>云端存档</h2>
+      <label>玩家名</label>
+      <input id="s-user" placeholder="输入名字查询">
+      <button class="ghost" onclick="pullSave()">拉取存档</button>
+      <label>存档内容（可编辑后上传）</label>
+      <textarea id="s-data" placeholder="拉取后会显示在这里"></textarea>
+      <button onclick="pushSave()">上传这份存档</button>
+      <p class="note" id="save-note"></p>
+    </div>
+
+    <div class="card">
+      <h2>战场通讯</h2>
+      <div id="msgs" style="max-height:220px;overflow:auto"><p class="empty">加载中…</p></div>
+      <label>发一条</label>
+      <div style="display:flex;gap:8px">
+        <input id="m-user" placeholder="名字" style="flex:0 0 110px">
+        <input id="m-text" placeholder="内容">
+      </div>
+      <button class="ghost" onclick="sendMsg()">发送</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+var API = '';
+
+function esc(s){
+  return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
+    return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c];
+  });
+}
+
+function time(ts){
+  var d = new Date(ts);
+  return d.getHours() + ':' + String(d.getMinutes()).padStart(2,'0');
+}
+
+function loadOrders(){
+  fetch(API + '/api/orders').then(function(r){return r.json()}).then(function(d){
+    var list = (d && d.orders) || [];
+    if(!list.length){
+      document.getElementById('orders').innerHTML = '<p class="empty">全服暂无挂单</p>';
+      return;
+    }
+    var rows = list.map(function(o){
+      return '<tr>' +
+        '<td><span class="tag ' + esc(o.type) + '">' + (o.type === 'buy' ? '求购' : '出售') + '</span></td>' +
+        '<td>' + esc(o.item) + '</td>' +
+        '<td class="p">' + esc(o.price) + '</td>' +
+        '<td class="u">' + esc(o.user) + '</td>' +
+        '<td style="text-align:right"><button class="cancel" data-id="' + esc(o.id) + '" onclick="cancel(this.dataset.id)">撤</button></td>' +
+      '</tr>';
+    }).join('');
+    document.getElementById('orders').innerHTML =
+      '<table><thead><tr><th>类型</th><th>物品</th><th>价格</th><th>挂单人</th><th></th></tr></thead><tbody>' + rows + '</tbody></table>';
+  }).catch(function(){
+    document.getElementById('orders').innerHTML = '<p class="empty">加载失败</p>';
+  });
+}
+
+function postOrder(){
+  var note = document.getElementById('post-note');
+  var body = {
+    user: document.getElementById('f-user').value,
+    item: document.getElementById('f-item').value,
+    price: Number(document.getElementById('f-price').value),
+    type: document.getElementById('f-type').value
+  };
+  if(!body.user || !body.item){ note.textContent = '玩家名和物品 ID 都要填'; return; }
+  note.textContent = '提交中…';
+  fetch(API + '/api/orders', {
+    method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)
+  }).then(function(r){return r.json()}).then(function(d){
+    note.textContent = d.ok ? '已上架' : ('失败：' + (d.error || '未知'));
+    if(d.ok) loadOrders();
+  }).catch(function(){ note.textContent = '网络失败'; });
+}
+
+function cancel(id){
+  fetch(API + '/api/orders/' + encodeURIComponent(id) + '/cancel', {method:'POST'}).then(function(){
+    loadOrders();
+  });
+}
+
+function pullSave(){
+  var note = document.getElementById('save-note');
+  var user = document.getElementById('s-user').value.trim();
+  if(!user){ note.textContent = '先填玩家名'; return; }
+  note.textContent = '拉取中…';
+  fetch(API + '/api/sync/' + encodeURIComponent(user)).then(function(r){return r.json()}).then(function(d){
+    if(d && d.ok){
+      document.getElementById('s-data').value = JSON.stringify(d.data, null, 2);
+      note.textContent = '已拉取（' + time(d.ts) + '）';
+    } else {
+      note.textContent = '云端暂无存档';
+      document.getElementById('s-data').value = '';
+    }
+  }).catch(function(){ note.textContent = '网络失败'; });
+}
+
+function pushSave(){
+  var note = document.getElementById('save-note');
+  var user = document.getElementById('s-user').value.trim();
+  var raw = document.getElementById('s-data').value.trim();
+  if(!user || !raw){ note.textContent = '玩家名和内容都要有'; return; }
+  var data;
+  try { data = JSON.parse(raw); } catch(e){ note.textContent = '存档不是合法 JSON'; return; }
+  note.textContent = '上传中…';
+  fetch(API + '/api/sync', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({user:user, data:data})
+  }).then(function(r){return r.json()}).then(function(d){
+    note.textContent = d.ok ? '已上传' : ('失败：' + (d.error || '未知'));
+  }).catch(function(){ note.textContent = '网络失败'; });
+}
+
+function loadMsgs(){
+  fetch(API + '/api/messages').then(function(r){return r.json()}).then(function(d){
+    var list = (d && d.messages) || [];
+    if(!list.length){
+      document.getElementById('msgs').innerHTML = '<p class="empty">还没有消息</p>';
+      return;
+    }
+    document.getElementById('msgs').innerHTML = list.slice().reverse().map(function(m){
+      return '<div class="msg"><b>' + esc(m.user) + '</b>' + esc(m.text) + '<span>' + time(m.ts) + '</span></div>';
+    }).join('');
+  }).catch(function(){
+    document.getElementById('msgs').innerHTML = '<p class="empty">加载失败</p>';
+  });
+}
+
+function sendMsg(){
+  var user = document.getElementById('m-user').value.trim() || '网页玩家';
+  var text = document.getElementById('m-text').value.trim();
+  if(!text) return;
+  fetch(API + '/api/messages', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({user:user, text:text})
+  }).then(function(){
+    document.getElementById('m-text').value = '';
+    loadMsgs();
+  });
+}
+
+loadOrders();
+loadMsgs();
+setInterval(loadOrders, 15000);
+setInterval(loadMsgs, 15000);
+</script>
+</body>
+</html>

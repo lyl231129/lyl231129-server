@@ -1,0 +1,11 @@
+# 部署到云平台时不上传这些
+node_modules
+dist
+cloudflared.exe
+go-live.js
+set-base.js
+start.bat
+.git
+.gitignore
+*.log
+data

@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: lyl231129-server
+    runtime: node
+    plan: free
+    branch: main
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production

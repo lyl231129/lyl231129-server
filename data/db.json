@@ -1,0 +1,26 @@
+{
+  "games": [
+    {
+      "id": "deltaforce-seed",
+      "name": "三角洲行动",
+      "en": "Delta Force",
+      "desc": "小米手环 9 Pro 上的战术小游戏：干员、军械库、任务、交易行、仓库、战绩统计，支持云端存档与全服通讯。",
+      "version": "1.0.00.40",
+      "pkg": "com.lilin.deltaforce",
+      "device": "小米手环 9 Pro",
+      "tags": ["交易行", "云存档", "战场通讯", "蓝牙", "干员", "军械库"],
+      "cover": "",
+      "file": "com.lilin.deltaforce.debug.1.0.00.40.rpk",
+      "link": "",
+      "status": "published",
+      "downloads": 0,
+      "created": 1790409000000,
+      "updated": 1790409000000
+    }
+  ],
+  "orders": [],
+  "saves": {},
+  "messages": [],
+  "downloads": {},
+  "visits": 0
+}

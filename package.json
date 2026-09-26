@@ -1,0 +1,12 @@
+{
+  "name": "lyl231129-server",
+  "version": "1.0.0",
+  "private": true,
+  "description": "lyl231129 个人主页 + 三角洲行动游戏后端（零依赖 Node 服务）",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
