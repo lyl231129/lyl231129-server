@@ -209,6 +209,33 @@ node deploy-oray.js --reset                            恢复离线模式
 > ⚠️ 本地服务器（`start.bat` / `node server.js`）必须一直开着，否则手环连不上。
 > ⚠️ 流量约 1G/月，超了收费；游戏包下载量上来后留意用量。
 
+## 海外免费平台 · Render（真免费·固定域名·不用常开电脑）
+
+游戏要长期运营、又想要**真免费 + 固定域名 + 不用自己电脑常开**，国内没有，海外选 **Render**——它是 2026 年唯一还活着的「真·永久免费」通用 PaaS：
+
+- 免费 Web Service：**750 小时/月**（够 1 个服务 24/7）、512MB RAM、100GB 带宽、**不需要信用卡**。
+- 固定域名 `https://<服务名>.onrender.com`，HTTPS，地址不变，不用反复重打包。
+- 代码零改动（`server.js` 已支持 `PORT` 环境变量，Render 自动注入）。
+
+代价（想清楚再选）：
+
+- **免费档 15 分钟无访问会休眠**，下次访问冷启动 30~60 秒（手环偶尔请求能接受；想零冷启动用 UptimeRobot 每 10 分钟 ping 一下 `/health`，或升 $7/月 Starter）。
+- 部署要走一次 **GitHub**（界面英文，但步骤简单，脚本已打印中文指引）。
+- 海外节点，国内访问可能比国内云慢一点。
+
+`deploy-render.js` 帮你做本地准备 + 地址接入：
+
+```bash
+node deploy-render.js --init                                         生成 render.yaml/.gitignore + 初始化 git
+node deploy-render.js --wire https://lyl231129-server.onrender.com   部署完拿到地址后，写源码 + 重打包
+node deploy-render.js --wire <URL> --no-build                       只写不改包（调试）
+node deploy-render.js --check / --reset                             查看 / 恢复离线
+```
+
+完整流程：`--init` → 去 GitHub 建空仓库并 `git push` → render.com 控制台 New → Web Service → 连 GitHub 选仓库（自动读 `render.yaml`）→ 拿到地址 → `--wire <地址>`。脚本会生成 `render.yaml`（含 `healthCheckPath: /health`、free 计划）和忽略 `node_modules/`、`dist/`、`admin.json` 的 `.gitignore`。
+
+> ⚠️ 免费档磁盘是临时的，重启会丢 `data/db.json`；演示/交易行/存档够用，正式运营升 Starter 或挂外部存储。
+
 ## 目录
 
 ```
@@ -218,6 +245,7 @@ server/
   deploy-cloud.js      一键部署到免费云平台拿固定域名（fly.io，国外）
   deploy-cloudbase.js  一键部署到腾讯云 CloudBase（国内·中文·免费体验版）
   deploy-oray.js       花生壳免费版一键接入（改源码 + 重打包，国内·真免费·需电脑常开）
+  deploy-render.js     海外 Render 免费档一键部署（真免费·固定域名·不用常开电脑）
   core.js         业务逻辑（server.js 与云函数共用）
   cloudbase/      CloudBase 云函数目录（index.js + core.js + package.json）
   public/         index.html 个人主页 · delta.html 玩家站
