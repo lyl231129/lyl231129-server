@@ -219,7 +219,7 @@ node deploy-oray.js --reset                            恢复离线模式
 
 代价（想清楚再选）：
 
-- **免费档 15 分钟无访问会休眠**，下次访问冷启动 30~60 秒（手环偶尔请求能接受；想零冷启动用 UptimeRobot 每 10 分钟 ping 一下 `/health`，或升 $7/月 Starter）。
+- **免费档 15 分钟无访问会休眠**，下次访问冷启动 30~60 秒（手环偶尔请求能接受；想零冷启动用保活脚本或 UptimeRobot 每 5 分钟 ping 一下 `/health`，或升 $7/月 Starter）。
 - 部署要走一次 **GitHub**（界面英文，但步骤简单，脚本已打印中文指引）。
 - 海外节点，国内访问可能比国内云慢一点。
 
@@ -236,6 +236,34 @@ node deploy-render.js --check / --reset                             查看 / 恢
 
 > ⚠️ 免费档磁盘是临时的，重启会丢 `data/db.json`；演示/交易行/存档够用，正式运营升 Starter 或挂外部存储。
 
+### 消除休眠卡顿（保活）
+
+Render 免费档 15 分钟无访问会休眠，下次冷启动要 30~60 秒。**让它「一直醒着」只需每 5 分钟内有人访问一次 `/health`**，两条路任选：
+
+**① 本地保活脚本（电脑开着就生效，免费、无需账号）**
+
+`keepalive.js` 每 5 分钟自动 ping 一次你的 `/health`：
+
+```bash
+node keepalive.js https://你的.onrender.com            # 默认每 5 分钟
+node keepalive.js https://你的.onrender.com 300        # 显式 300 秒
+```
+
+想开机自启：把 `start_keepalive.bat https://你的.onrender.com` 放进「任务计划程序」开机触发（说明见文件头注释）。脚本一关、电脑一关，保活就停。
+
+**② UptimeRobot（云端保活，电脑关了也生效，强烈推荐）**
+
+免费、不用装软件，从云端每 5 分钟 ping 一次：
+
+1. 打开 uptimerobot.com → 右上角 **Sign Up**（用英文邮箱注册，免费）。
+2. 登录后点 **Add New Monitor**（绿色加号）。
+3. Monitor Type 选 **HTTP(s)**；Friendly Name 填 `lyl-deltaforce`；URL 填 `https://你的.onrender.com/health`；Interval 选 **5 minutes**（免费档最小粒度）。
+4. 点 **Create Monitor**。
+
+之后 UptimeRobot 每隔 5 分钟访问一次 `/health`，Render 永远不休眠，**国内访问从「偶尔卡 30~60 秒」变成「基本秒开」**（海外延迟本身仍在，但不再有冷启动）。
+
+> 注意：保活只解决「冷启动卡顿」，解决不了「海外节点本身的延迟」。若国内访问仍觉得慢，那是物理距离，只能换国内主机（CloudBase，见上）。
+
 ## 目录
 
 ```
@@ -246,6 +274,8 @@ server/
   deploy-cloudbase.js  一键部署到腾讯云 CloudBase（国内·中文·免费体验版）
   deploy-oray.js       花生壳免费版一键接入（改源码 + 重打包，国内·真免费·需电脑常开）
   deploy-render.js     海外 Render 免费档一键部署（真免费·固定域名·不用常开电脑）
+  keepalive.js         保活脚本：每 5 分钟 ping /health，消除 Render 免费档休眠卡顿
+  start_keepalive.bat  Windows 一键启动保活（开机自启用）
   core.js         业务逻辑（server.js 与云函数共用）
   cloudbase/      CloudBase 云函数目录（index.js + core.js + package.json）
   public/         index.html 个人主页 · delta.html 玩家站

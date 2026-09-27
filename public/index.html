@@ -452,18 +452,24 @@ window.__GAMES__ = /*__GAMES__*/null;
     }).join('');
   }
 
+  // 远服务器可能很慢：给所有后端请求加 3 秒超时，避免首屏一直转圈
+  function withTimeout(ms){
+    try{ var c=new AbortController(); setTimeout(function(){c.abort();},ms); return c.signal; }catch(e){ return null; }
+  }
+
   if(Array.isArray(window.__GAMES__)){
     render(window.__GAMES__);
   }else{
-    fetch('/api/games').then(function(r){return r.json();})
+    fetch('/api/games',{signal:withTimeout(3000)}).then(function(r){return r.json();})
       .then(function(d){render(d.games||[]);})
       .catch(function(){render([]);});
   }
 
-  // 后端状态
+  // 后端状态（静态托管时后端不存在：首次失败即停轮询，不再反复打远服务器）
   function setState(cls,txt){var el=document.getElementById('stState');el.className=cls;el.textContent=txt;}
+  var pollTimer=null;
   function poll(){
-    fetch('/api/stats').then(function(r){return r.json();}).then(function(d){
+    fetch('/api/stats',{signal:withTimeout(3000)}).then(function(r){return r.json();}).then(function(d){
       if(!d||!d.ok) throw 0;
       document.getElementById('stGames').textContent=d.games;
       document.getElementById('stOrders').textContent=d.ordersActive;
@@ -471,10 +477,11 @@ window.__GAMES__ = /*__GAMES__*/null;
       setState('on','在线');
     }).catch(function(){
       setState('off','离线');
+      if(pollTimer){clearInterval(pollTimer);pollTimer=null;}
     });
   }
   poll();
-  setInterval(poll,20000);
+  pollTimer=setInterval(poll,20000);
   fetch('/api/hit',{method:'POST'}).catch(function(){});
 })();
 </script>
